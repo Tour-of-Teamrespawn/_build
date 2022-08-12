@@ -2,6 +2,12 @@
 
 Simple repository for the latest version of the helper script to automatically update the version, pack as PBO and upload your mission to the Tour server.
 
+- [build.ps1](#buildps1)
+  - [Prerequisites](#prerequisites)
+  - [How to configure](#how-to-configure)
+  - [How to run](#how-to-run)
+  - [build.ps1 variable reference](#buildps1-variable-reference)
+
 ## Prerequisites
 
 Prerequisites for this helper script are as follows:
