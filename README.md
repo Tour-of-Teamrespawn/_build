@@ -28,6 +28,15 @@ Prerequisites for this helper script are as follows:
     2. The comment can be either a line `// comment` or multi-line block `/* comment */` type.
 5. Ensure that _ALL_ other files with a reference to the mission name and version in are updated to match the right format you set for `$MissionName_WithV`. If it does not _exactly_ match, then it won't update or change a reference.
 
+## How to run
+
+1. Open a PowerShell terminal (can be the integrated terminal in VS Code)
+2. Navigate to your mission folder with `cd "c:\path\to\mission\folder"`
+3. Enter and run: `.\build.ps1`
+4. Follow the script prompts for desired options
+5. ???
+6. profit
+
 ## build.ps1 variable reference
 
 This section is just a reference for the script variables that can be set, split into standard variables:
