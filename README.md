@@ -1,11 +1,11 @@
 # build.ps1
 
-Simple repository for the latest version of the helper script to automatically update the version, pack as PBO and upload your mission to the Tour server.
+Simple repository for the latest version of the Tour dev helper script that can automatically update the version of your mission, pack it as a PBO, upload your mission to the Tour server, and then start a local dedicated server instance with your new mission loaded for LAN testing.
 
 - [build.ps1](#buildps1)
   - [Prerequisites](#prerequisites)
-  - [How to configure](#how-to-configure)
-  - [How to run](#how-to-run)
+  - [How to configure the script for your mission](#how-to-configure-the-script-for-your-mission)
+  - [How to run the script](#how-to-run-the-script)
   - [build.ps1 variable reference](#buildps1-variable-reference)
 
 ## Prerequisites
@@ -19,14 +19,14 @@ Prerequisites for this helper script are as follows:
 - PowerShell configured to allow scripts to run.
   - Already complete if you have followed the [README](https://github.com/Tour-of-Teamrespawn/.github/blob/main/profile/README.md#configure-powershell-git-and-build-script) in the org root.
   - Pretty much consists of running PowerShell as administrator and running `Set-ExecutionPolicy Unrestricted -Force -Confirm:$false` or adding `Set-ExecutionPolicy Unrestricted -Scope User` & some environment variables to your PowerShell profile.
-- Tour server access to upload files via FTP. (Ask an admin for CPDeluxe access if you do not have this already)
+- Tour server access to upload files via FTP. (Ask an admin for CPDeluxe access if you do not have this already).
 
-## How to configure
+## How to configure the script for your mission
 
 1. Copy the `build.ps1` from this repository, to the root of your mission folder.
-    1. e.g. `C:\Users\user\Documents\Arma 3 - Other Profiles\ARMA_User\missions\30_tour_mission_name.Altis\build.ps1`
+    1. e.g. `C:\Users\user\Documents\Arma 3 - Other Profiles\ARMA_User\missions\30_tour_mission_name.Altis\build.ps1`.
 2. If you want to use the start local dedicated server option, copy the `server.cfg` file to your Arma 3 install folder if you do not have one already.
-    1. __NOT__ your mission folder! It should go in the same directory where the `arma3server.exe` / `arma3server_x64.exe` is located
+    1. __NOT__ your mission folder! It should go in the same directory where the `arma3server.exe` / `arma3server_x64.exe` is located.
     2. Replace `MY_PLAYER_ID` in the file with your Arma 3 ID to get admin/debug console.
 3. Open the `build.ps1` file in your text editor and make all the variables are set correctly. If required, see [Variable reference](#buildps1-variable-reference) for more information.
 4. Create or edit `init.sqf` in the root of your mission folder. Then add a comment _anywhere_ in the `init.sqf` with the format `###MISSION_VERSION 0.1` leaving `###MISSION_VERSION` exactly as-is and replacing `0.1` with the current mission version.
@@ -34,14 +34,20 @@ Prerequisites for this helper script are as follows:
     2. The comment can be either a line `// comment` or multi-line block `/* comment */` type.
 5. Ensure that _ALL_ other files with a reference to the mission name and version in are updated to match the right format you set for `$MissionName_WithV`. If it does not _exactly_ match, then it won't update or change a reference.
 
-## How to run
+## How to run the script
 
-1. Open a PowerShell terminal (can be the integrated terminal in VS Code)
-2. Navigate to your mission folder with `cd "c:\path\to\mission\folder"`
-3. Enter and run: `.\build.ps1`
-4. Follow the script prompts for desired options
-5. ???
-6. profit
+1. Open a PowerShell terminal (can be the integrated terminal in VS Code).
+2. Navigate to your mission folder with `cd "c:\path\to\mission\folder"`.
+3. Enter and run: `.\build.ps1`.
+4. Follow the script prompts, choices are to:
+   1. Increment version and pack PBO.
+      1. With automatic or manual versioning. Manually specifying version would be used to say "build / release _this_ as version 1.0" for example.
+   2. Upload newly incremented & packed PBO to Tour server (requires step 1 to be chosen in this run).
+      1. Specify Tour server IP (if environment variable `TOUR_SERVER_IP` is not defined).
+      2. Specify Tour FTP port (if environment variable `TOUR_SERVER_PORT` is not defined).
+      3. Specify Tour FTP username (if environment variable `TOUR_FTP_USERNAME` is not defined).
+      4. Specify Tour FTP password (if environment variable `TOUR_FTP_PASSWORD` is not defined).
+   3. Start local dedicated server with newly packed / incremented PBO.
 
 ## build.ps1 variable reference
 
