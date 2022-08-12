@@ -1,4 +1,6 @@
-[CmdletBinding(SupportsShouldProcess=$true)]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable', '')]
+
+[CmdletBinding(SupportsShouldProcess = $true)]
 param ()
 
 ###################################################################################################
@@ -11,7 +13,7 @@ param ()
 # Tour (proposed) mission naming standard like:
 #   "30 [Tour] MISSION NAME v1.1"
 #   "30 [Tour] Operation Bitemark v1.0"
-$MissionName_withV = "30 [Tour] MISSION NAME v"
+$MissionName_withV = '30 [Tour] MISSION NAME v'
 
 ###################################################################################################
 
@@ -87,20 +89,19 @@ $ErrorActionPreference = 'Stop'
 if (($null -eq $PSScriptRoot) -or ([System.String]::IsNullOrWhiteSpace($PSScriptRoot))) {
     # assume we are in the root of the mission folder (same as this file)
     $ProjectRoot = (Get-Location).Path
-}
-else {
+} else {
     $ProjectRoot = $PSScriptRoot
 }
 $MissionFolderName = Split-Path $ProjectRoot -Leaf
 
-$decision = $Host.UI.PromptForChoice("Increment version and make PBO?", 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
+$decision = $Host.UI.PromptForChoice('Increment version and make PBO?', 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
 if ($decision -eq 0) {
     # Automatic increment of mission version found in init.sqf, used to add to the exported PBO
     $InitSQF = Get-Content -Path (Join-Path -Path $ProjectRoot -ChildPath 'init.sqf') -Raw
     if ($InitSQF -match '###MISSION_VERSION\s+(\d+\.\d+)') {
 
         
-        $decision = $Host.UI.PromptForChoice("Set versioning method", 'Automatic version increment, or set manually?', @('&Automatic', '&Manual'), 0)
+        $decision = $Host.UI.PromptForChoice('Set versioning method', 'Automatic version increment, or set manually?', @('&Automatic', '&Manual'), 0)
         if ($decision -eq 0) {
             # automatic
             $Version = [System.Version]($Matches.1)
@@ -111,28 +112,30 @@ if ($decision -eq 0) {
 
         } else {
             # manual
-            $NewVersion = "NOT A REAL VERSION"
-            while ($NewVersion -notmatch '(\d+\.\d+)') {
+            $NewVersion = 'NOT A REAL VERSION'
+            while ($NewVersion -notmatch '^\d+\.\d+$') {
                 try {
                     $NewVersion = Read-Host "Enter the desired version in the format XX.XX, where X can be any number of digits [0-9] with a dot separating them.`nFor example: 123.123 or 1.0`nDo not include any letters or symbols" -ErrorAction 'Stop'
                     $NewVersion = [System.Version]$NewVersion
-                }
-                catch {
+                } catch {
                     # if we fail to cast user input to a valid version, reset and try again
-                    $NewVersion = "NOT A REAL VERSION"
+                    $NewVersion = 'NOT A REAL VERSION'
                 }
             }
         }
         
-        if ($PSCmdlet.ShouldProcess("All matching files", "Update all references to version")) {
+        if ($PSCmdlet.ShouldProcess('All matching files', 'Update all references to version')) {
             $NewInitSQF = ($InitSQF -replace '###MISSION_VERSION\s(\d+\.\d+)', "###MISSION_VERSION $NewVersion").split("`n")
             # WriteAllText with joined string array instead of WriteAllLines to stop adding a CRLF to the end of file
-            try { [System.IO.File]::WriteAllText((Join-Path -Path $ProjectRoot -ChildPath 'init.sqf'), ($NewInitSQF -join "`n")) }
-            catch { throw "Failed to overwrite init.sqf with version tag. You may need to close the file and re-run the build script." }
-            Write-Host "Overwrote init.sqf with version tag successfully"
+            try {
+                [System.IO.File]::WriteAllText((Join-Path -Path $ProjectRoot -ChildPath 'init.sqf'), ($NewInitSQF -join "`n")) 
+            } catch {
+                throw 'Failed to overwrite init.sqf with version tag. You may need to close the file and re-run the build script.' 
+            }
+            Write-Host 'Overwrote init.sqf with version tag successfully'
 
             $ExtensionsToCheckForVersion = @('.sqf', '.cpp', '.hpp', '.ext', '.sqs', '.txt', '.md')
-            $allFilesToCheck = Get-ChildItem -Path $ProjectRoot -File -Recurse | Where-Object 'Extension' -in $ExtensionsToCheckForVersion
+            $allFilesToCheck = Get-ChildItem -Path $ProjectRoot -File -Recurse | Where-Object 'Extension' -In $ExtensionsToCheckForVersion
 
             foreach ($file in $allFilesToCheck) {
                 # make sure automatic $matches variable is overwritten to null
@@ -140,26 +143,27 @@ if ($decision -eq 0) {
 
                 $FileContents = Get-Content -Path $File.FullName -Raw
 
-                if ($FileContents -match ([regex]::Escape($MissionName_withV) + "\d+\.\d+")) {
+                if ($FileContents -match ([regex]::Escape($MissionName_withV) + '\d+\.\d+')) {
 
-                    $NewFileContents = ($FileContents -replace ([regex]::Escape($MissionName_withV) + "\d+\.\d+"), ($MissionName_withV + $NewVersion)).split("`n")
-                    try { [System.IO.File]::WriteAllText($File.FullName, ($NewFileContents -join "`n")) }
-                    catch { throw "Failed to overwrite $($File.Name) with version tag. You may need to close the file and re-run the build script." }
+                    $NewFileContents = ($FileContents -replace ([regex]::Escape($MissionName_withV) + '\d+\.\d+'), ($MissionName_withV + $NewVersion)).split("`n")
+                    try {
+                        [System.IO.File]::WriteAllText($File.FullName, ($NewFileContents -join "`n")) 
+                    } catch {
+                        throw "Failed to overwrite $($File.Name) with version tag. You may need to close the file and re-run the build script." 
+                    }
                     Write-Host "Overwrote $($File.Name) with version tag successfully"
 
-                }
-                else {
+                } else {
                     Write-Verbose "$($File.Name) did not have a matched version. Skipping..."
                 }
             }
         }
 
-    }
-    else {
+    } else {
         Write-Warning "Version missing from init.sqf. For automatic version increments add a block comment somewhere in your init.sqf with a line exactly like so: '###MISSION_VERSION 0.1'"
     }
 
-    if ($PSCmdlet.ShouldProcess("Mission folder", "Pack PBO and export")) {
+    if ($PSCmdlet.ShouldProcess('Mission folder', 'Pack PBO and export')) {
         Write-Host "Packing mission folder: '$MissionFolderName' to path: '$OutputPath' as '$MissionFolderName.pbo'"
         & $FileBank_EXE -dst $OutputPath $ProjectRoot
 
@@ -169,16 +173,15 @@ if ($decision -eq 0) {
         # insert (file name compatible) version to pbo before world
         # insert _mods_ as we pretty much always use them anyway
         # e.g. 30_tour_power_surge.Enoch.pbo -> 30_tour_power_surge_mods_0_2.Enoch.pbo
-        $PBO_withVersion = $ExportedPBO.Name.SubString(0, $ExportedPBO.Name.IndexOf('.')) + "_mods" + "_v$($NewVersion.ToString().Replace('.','_'))" + $ExportedPBO.Name.SubString($ExportedPBO.Name.IndexOf('.'))
+        $PBO_withVersion = $ExportedPBO.Name.SubString(0, $ExportedPBO.Name.IndexOf('.')) + '_mods' + "_v$($NewVersion.ToString().Replace('.','_'))" + $ExportedPBO.Name.SubString($ExportedPBO.Name.IndexOf('.'))
 
         # rename PBO to include version
         Write-Host "Renaming PBO from '$MissionFolderName.pbo' to '$PBO_withVersion'"
         $NewPBO = Rename-Item -Path $ExportedPBO.FullName -NewName $PBO_withVersion -Force -PassThru
     }
 
-}
-else {
-    Write-Host "Skipping version increment and PBO make..."
+} else {
+    Write-Host 'Skipping version increment and PBO make...'
 }
 
 if ($null -eq $NewPBO) {
@@ -198,36 +201,36 @@ if ($null -ne $PBO_withVersion) {
             # Environment var for IP not set, prompt for response
             Write-Warning "Environment variable 'TOUR_SERVER_IP' not set, so prompting for user input"
             
-            $TourServerIP = "INVALID_VAR"
-            while ($TourServerIP -notmatch '\d+\.\d+.\d+.\d+') {
-                $TourServerIP = Read-Host "Enter Tour server IP e.g. 1.2.3.4"
+            $TourServerIP = 'INVALID_VAR'
+            while ($TourServerIP -notmatch '^\d+\.\d+.\d+.\d+$') {
+                $TourServerIP = Read-Host 'Enter Tour server IP e.g. 1.2.3.4'
             }
         } else {
-            Write-Host "Getting Tour server IP env:TOUR_SERVER_IP"
+            Write-Host 'Getting Tour server IP env:TOUR_SERVER_IP'
             $TourServerIP = $env:TOUR_SERVER_IP
         }
 
         if ($null -eq $env:TOUR_SERVER_PORT) {
             # Environment var for port not set, prompt for response
             Write-Warning "Environment variable 'TOUR_SERVER_PORT' not set, so prompting for user input"
-            $TourServerPort = "INVALID_VAR"
-            while ($TourServerPort -notmatch '\d+') {
-                $TourServerPort = Read-Host "Enter FTP port for Tour server e.g. 8821"
+            $TourServerPort = 'INVALID_VAR'
+            while ($TourServerPort -notmatch '^\d+$') {
+                $TourServerPort = Read-Host 'Enter FTP port number for Tour server e.g. 8821'
             }
         } else {
-            Write-Host "Getting FTP port from env:TOUR_SERVER_PORT"
+            Write-Host 'Getting FTP port from env:TOUR_SERVER_PORT'
             $TourServerPort = $env:TOUR_SERVER_PORT
         }
 
         if ($null -eq $env:TOUR_FTP_USERNAME) {
             # Environment var for username not set, prompt for response
             Write-Warning "Environment variable 'TOUR_FTP_USERNAME' not set, so prompting for user input"
-            $FTPUsername = ""
+            $FTPUsername = ''
             while ([System.String]::IsNullOrWhiteSpace($FTPUsername)) {
                 $FTPUsername = Read-Host "Enter or paste FTP username for the server '$TourServerIP'"
             }
         } else {
-            Write-Host "Getting FTP username from env:TOUR_FTP_USERNAME"
+            Write-Host 'Getting FTP username from env:TOUR_FTP_USERNAME'
             $FTPUsername = $env:TOUR_FTP_USERNAME
         }
 
@@ -235,12 +238,12 @@ if ($null -ne $PBO_withVersion) {
             # Environment var for password not set, prompt for response
             Write-Warning "Environment variable 'TOUR_FTP_PASSWORD' not set, so prompting for user input"
             
-            $FTPPassword = ""
+            $FTPPassword = ''
             while ([System.String]::IsNullOrWhiteSpace($FTPPassword)) {
                 $FTPPassword = Read-Host -MaskInput "Enter or paste FTP password for user '$FTPUsername'"
             }
         } else {
-            Write-Host "Getting FTP password from env:TOUR_FTP_PASSWORD"
+            Write-Host 'Getting FTP password from env:TOUR_FTP_PASSWORD'
             $FTPPassword = $env:TOUR_FTP_PASSWORD
         }
 
@@ -255,13 +258,13 @@ if ($null -ne $PBO_withVersion) {
         $TourServer = "$($TourServerIP):$($TourServerPort)"
         $FTPPath = "ftp://$TourServer/$($TourServerIP)_2302/mpmissions/$PBO_withVersion"
 
-        if ($PSCmdlet.ShouldProcess($FTPPath, "Upload PBO to")) {
+        if ($PSCmdlet.ShouldProcess($FTPPath, 'Upload PBO to')) {
             Write-Host "Starting FTP upload to '$FTPPath'"
 
             $ftp = [System.Net.FtpWebRequest]::Create($FTPPath)
             $ftp = [System.Net.FtpWebRequest]$ftp
             $ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
-            $ftp.Credentials = new-object System.Net.NetworkCredential($FTPUsername, $FTPPassword)
+            $ftp.Credentials = New-Object System.Net.NetworkCredential($FTPUsername, $FTPPassword)
             $ftp.UseBinary = $true
             $ftp.UsePassive = $true
             $ftp.EnableSsl = $true
@@ -275,7 +278,7 @@ if ($null -ne $PBO_withVersion) {
             $rs.Close()
             $rs.Dispose()
 
-            Write-Host "FTP upload successful"
+            Write-Host 'FTP upload successful'
         }
         
     } else {
@@ -287,30 +290,32 @@ if ($null -ne $PBO_withVersion) {
 }
 
 # START LOCAL DEDICATED SERVER WITH LATEST MISSIONS
-$decision = $Host.UI.PromptForChoice("Start local dedicated server", 'Do you want to start up a local dedicated server?', @('&Yes', '&No'), 1)
+$decision = $Host.UI.PromptForChoice('Start local dedicated server', 'Do you want to start up a local dedicated server?', @('&Yes', '&No'), 1)
 if ($decision -eq 0) {
 
     if ($null -eq $NewPBO) {
-        Write-Host "NewPBO not found (didn't increment?) using last modified PBO in output folder for server config"
-        $NewPBO = Get-ChildItem -Path $OutputPath -Filter '*.pbo' | sort-object -Property 'LastWriteTime' -Descending | Select-Object -First 1
+        Write-Host 'NewPBO not found (didnt increment?) using last modified PBO in output folder for server config'
+        $NewPBO = Get-ChildItem -Path $OutputPath -Filter '*.pbo' | Sort-Object -Property 'LastWriteTime' -Descending | Select-Object -First 1
     } else {
-        Write-Host "Using new PBO with incremented version in server config."
+        Write-Host 'Using new PBO with incremented version in server config.'
     }
 
-    if ($PSCmdlet.ShouldProcess("Local dedicated Arma 3 server", "Update config and start server")) {
+    if ($PSCmdlet.ShouldProcess('Local dedicated Arma 3 server', 'Update config and start server')) {
 
         $CurrCFG = Get-Content -Path $A3_Server_Config -Raw
         if ($CurrCFG -match 'template\s+=\s+(.*);') {
             $NewCFG = ($CurrCFG -replace $Matches.1, $NewPBO.Basename).split("`n")
     
-            try { [System.IO.File]::WriteAllText($A3_Server_Config, ($NewCFG -join "`n")) }
-            catch { throw "Failed to overwrite server config with new PBO. You may need to close the file and re-run the build script." }
-            Write-Host "Overwrote server config with version tag successfully"
+            try {
+                [System.IO.File]::WriteAllText($A3_Server_Config, ($NewCFG -join "`n")) 
+            } catch {
+                throw 'Failed to overwrite server config with new PBO. You may need to close the file and re-run the build script.' 
+            }
+            Write-Host 'Overwrote server config with version tag successfully'
         }
 
         & $A3_Server -config="$A3_Server_Config" -name=LocalDedicatedServer -mod="$($ClientModList -join ';')" -serverMod="$($ServerModList -join ';')"   
     }
-}
-else {
+} else {
     Write-Host 'Skip starting dedicated server'
 }
