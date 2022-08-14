@@ -15,16 +15,18 @@ param (
 ###################################################################################################
 
 if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version from GitHub')) {
-    $NewScriptContent = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
+    $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
 
     $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
 
-    if ($NewScriptContent -ne $CurrentScriptContents) {
+    if ($NewScriptContents -ne $CurrentScriptContents) {
+
+        Compare-Object -ReferenceObject ($CurrentScriptContents.split("`n")) -DifferenceObject ($NewScriptContents.split("`n")) | Out-String | Write-Verbose
         
         Write-Host "Upadting this script with new file contents..."
-        [System.IO.File]::WriteAllText($MyInvocation.MyCommand.Path, $NewScriptContent)
+        [System.IO.File]::WriteAllText($MyInvocation.MyCommand.Path, $NewScriptContents)
         
-        Write-Host "Script has been updated, please re-run to use new code." -ForegroundColor 'Orange'
+        Write-Host "Script has been updated, please re-run to use new code." -ForegroundColor 'Yellow'
         exit
     } else {
         Write-Host "Current script matches latest script, skipping update and continuing as normal..." -ForegroundColor 'Green'
