@@ -6,7 +6,7 @@ Simple repository for the latest version of the Tour dev helper script that can 
   - [Prerequisites](#prerequisites)
   - [How to configure the script for your mission](#how-to-configure-the-script-for-your-mission)
   - [How to run the script](#how-to-run-the-script)
-  - [build.ps1 variable reference](#buildps1-variable-reference)
+  - [build.config.ps1 variable reference](#buildconfigps1-variable-reference)
 
 ## Prerequisites
 
@@ -23,12 +23,12 @@ Prerequisites for this helper script are as follows:
 
 ## How to configure the script for your mission
 
-1. Copy the `build.ps1` from this repository, to the root of your mission folder.
+1. Copy the `build.ps1` & `build.config.ps1` files from this repository, to the root of your mission folder.
     1. e.g. `C:\Users\user\Documents\Arma 3 - Other Profiles\ARMA_User\missions\30_tour_mission_name.Altis\build.ps1`.
 2. If you want to use the start local dedicated server option, copy the `server.cfg` file to your Arma 3 install folder if you do not have one already.
     1. __NOT__ your mission folder! It should go in the same directory where the `arma3server.exe` / `arma3server_x64.exe` is located.
     2. Replace `MY_PLAYER_ID` in the file with your Arma 3 ID to get admin/debug console.
-3. Open the `build.ps1` file in your text editor and make all the variables are set correctly. If required, see [Variable reference](#buildps1-variable-reference) for more information.
+3. Open the `build.config.ps1` file in your text editor and make all the variables are set correctly. If required, see [Variable reference](#buildps1-variable-reference) for more information.
 4. Create or edit `init.sqf` in the root of your mission folder. Then add a comment _anywhere_ in the `init.sqf` with the format `###MISSION_VERSION 0.1` leaving `###MISSION_VERSION` exactly as-is and replacing `0.1` with the current mission version.
     1. The version currently __MUST__ be in the format of `X.X` where `X` is one or more digits [`0-9`].
     2. The comment can be either a line `// comment` or multi-line block `/* comment */` type.
@@ -39,7 +39,7 @@ Prerequisites for this helper script are as follows:
 1. Open a PowerShell terminal (can be the integrated terminal in VS Code).
 2. Navigate to your mission folder with `cd "c:\path\to\mission\folder"`.
 3. Enter and run: `.\build.ps1`.
-4. Follow the script prompts, choices are to:
+4. Follow the on-screen script prompts, explanations for which are:
    1. Increment version and pack PBO.
       1. With automatic or manual versioning. Manually specifying version would be used to say "build / release _this_ as version 1.0" for example.
    2. Upload newly incremented & packed PBO to Tour server (requires step 1 to be chosen in this run).
@@ -48,8 +48,10 @@ Prerequisites for this helper script are as follows:
       3. Specify Tour FTP username (if environment variable `TOUR_FTP_USERNAME` is not defined).
       4. Specify Tour FTP password (if environment variable `TOUR_FTP_PASSWORD` is not defined).
    3. Start local dedicated server with newly packed / incremented PBO.
+5. (OPTIONAL) Use the script self-updater to save copy / pasting from GitHub
+   1. Enter and run: `.\build.ps1 -Update`
 
-## build.ps1 variable reference
+## build.config.ps1 variable reference
 
 This section is just a reference for the script variables that can be set, split into standard variables:
 
