@@ -15,6 +15,8 @@ param (
 ###################################################################################################
 
 if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version from GitHub')) {
+
+    Write-Host "Getting and comparing GitHub script with this script..."
     $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
 
     $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
