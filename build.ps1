@@ -1,3 +1,26 @@
+<#
+.SYNOPSIS
+    TOUR build helper script
+.DESCRIPTION
+    TOUR build helper script to automatically bump version, pack as PBO, upload to Tour via FTP & start local dedicated server
+.NOTES
+    Author: Andy455
+    Version: v0.3
+.LINK
+    https://github.com/Tour-of-Teamrespawn/_build
+.EXAMPLE
+    .\build.ps1
+    Runs the build script*, which will prompt for yes/no answers for the options, and will ask for more information if uploading to Tour FTP.
+    
+    *Assuming you are currently _in_ the mission folder. If not, first enter "cd c:\path\to\my\mission.Altis" substituting the actual path (you
+    can copy and paste it from the file explorer)
+.EXAMPLE
+    .\build.ps1 -Update
+    As above, this runs the build script but in the self-updating mode where it will check GitHub for the latest version and overwrite itself if
+    there are any changes to be made.
+    You will need to re-run the script after it has completed to ensure you are running the new version.
+#>
+
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidAssignmentToAutomaticVariable', '')]
 
 [CmdletBinding(SupportsShouldProcess = $true)]
