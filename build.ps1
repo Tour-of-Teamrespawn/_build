@@ -5,7 +5,7 @@
     TOUR build helper script to automatically bump version, pack as PBO, upload to Tour via FTP & start local dedicated server
 .NOTES
     Author: Andy455
-    Version: v0.3
+    Version: v0.4
 .LINK
     https://github.com/Tour-of-Teamrespawn/_build
 .EXAMPLE
@@ -39,22 +39,24 @@ param (
 
 if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version from GitHub')) {
 
-    Write-Host "Getting and comparing GitHub script with this script..."
-    $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
+    if ($Update) {
+        Write-Host "Getting and comparing GitHub script with this script..."
+        $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
 
-    $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
+        $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
 
-    if ($NewScriptContents -ne $CurrentScriptContents) {
+        if ($NewScriptContents -ne $CurrentScriptContents) {
 
-        Compare-Object -ReferenceObject ($CurrentScriptContents.split("`n")) -DifferenceObject ($NewScriptContents.split("`n")) | Out-String | Write-Verbose
-        
-        Write-Host "Upadting this script with new file contents..."
-        [System.IO.File]::WriteAllText($MyInvocation.MyCommand.Path, $NewScriptContents)
-        
-        Write-Host "Script has been updated, please re-run to use new code." -ForegroundColor 'Yellow'
-        exit
-    } else {
-        Write-Host "Current script matches latest script, skipping update and continuing as normal..." -ForegroundColor 'Green'
+            Compare-Object -ReferenceObject ($CurrentScriptContents.split("`n")) -DifferenceObject ($NewScriptContents.split("`n")) | Out-String | Write-Verbose
+            
+            Write-Host "Upadting this script with new file contents..."
+            [System.IO.File]::WriteAllText($MyInvocation.MyCommand.Path, $NewScriptContents)
+            
+            Write-Host "Script has been updated, please re-run to use new code." -ForegroundColor 'Yellow'
+            exit
+        } else {
+            Write-Host "Current script matches latest script, skipping update and continuing as normal..." -ForegroundColor 'Green'
+        }
     }
 } else {
     Write-Verbose "Self-updater skipped"
