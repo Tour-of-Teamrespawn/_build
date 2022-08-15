@@ -17,6 +17,9 @@ $Arma3ToolsFolder = 'C:\Program Files (x86)\Steam\steamapps\common\Arma 3 Tools'
 # Where to save the resulting PBO, set to MPMissions for easy local testing
 $OutputPath = "$Arma3InstallFolder\MPMissions"
 
+# Path to FileBank, part of the Arma 3 Tools steam download
+$FileBank_EXE = "$Arma3ToolsFolder\FileBank\FileBank.exe"
+
 ###################################################################################################
 # Local dedicated server related variables.
 

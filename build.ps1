@@ -5,7 +5,7 @@
     TOUR build helper script to automatically bump version, pack as PBO, upload to Tour via FTP & start local dedicated server
 .NOTES
     Author: Andy455
-    Version: v0.4
+    Version: v0.5
 .LINK
     https://github.com/Tour-of-Teamrespawn/_build
 .EXAMPLE
@@ -61,9 +61,6 @@ if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version fr
 } else {
     Write-Verbose "Self-updater skipped"
 }
-
-# Path to FileBank, part of the Arma 3 Tools steam download
-$FileBank_EXE = "$Arma3ToolsFolder\FileBank\FileBank.exe"
 
 $ErrorActionPreference = 'Stop'
 if (($null -eq $PSScriptRoot) -or ([System.String]::IsNullOrWhiteSpace($PSScriptRoot))) {
