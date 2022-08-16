@@ -28,6 +28,18 @@ Prerequisites for this helper script are as follows:
 2. If you want to use the start local dedicated server option, copy the `server.cfg` file to your Arma 3 install folder if you do not have one already.
     1. __NOT__ your mission folder! It should go in the same directory where the `arma3server.exe` / `arma3server_x64.exe` is located.
     2. Replace `MY_PLAYER_ID` in the file with your Arma 3 ID to get admin/debug console.
+    3. If you already have a server.cfg or equivalent config file, ensure that you have a `Missions` class defined. See below for example:
+```hpp
+class Missions
+{
+	class TestMission01
+	{
+		template = MISSION_NAME.WORLD;
+		difficulty = "veteran";
+		class Params {};
+	};
+};
+```
 3. Open the `build.config.ps1` file in your text editor and make all the variables are set correctly. If required, see [Variable reference](#buildps1-variable-reference) for more information.
 4. Create or edit `init.sqf` in the root of your mission folder. Then add a comment _anywhere_ in the `init.sqf` with the format `###MISSION_VERSION 0.1` leaving `###MISSION_VERSION` exactly as-is and replacing `0.1` with the current mission version.
     1. The version currently __MUST__ be in the format of `X.X` where `X` is one or more digits [`0-9`].
