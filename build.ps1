@@ -33,7 +33,7 @@ param (
 
 # dot source variables file, works sort of like #include
 # separating variables from code allows auto-update functionality
-. '.\build.config.ps1'
+. "$PSScriptRoot\build.config.ps1"
 
 ###################################################################################################
 
