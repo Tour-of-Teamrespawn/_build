@@ -5,7 +5,7 @@
     TOUR build helper script to automatically bump version, pack as PBO, upload to Tour via FTP & start local dedicated server
 .NOTES
     Author: Andy455
-    Version: v0.5
+    Version: v0.6
 .LINK
     https://github.com/Tour-of-Teamrespawn/_build
 .EXAMPLE
@@ -39,24 +39,28 @@ param (
 
 if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version from GitHub')) {
 
-    if ($Update) {
-        Write-Host "Getting and comparing GitHub script with this script..."
-        $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
+    Write-Host "Getting and comparing GitHub script with this script..."
+    $NewScriptContents = (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Tour-of-Teamrespawn/_build/main/build.ps1' -ErrorAction 'Stop').Content
 
-        $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
+    $CurrentScriptContents = Get-Content -Path $MyInvocation.MyCommand.Path -Raw
 
-        if ($NewScriptContents -ne $CurrentScriptContents) {
+    if ($NewScriptContents -ne $CurrentScriptContents) {
+
+        if ($Update) {
 
             Compare-Object -ReferenceObject ($CurrentScriptContents.split("`n")) -DifferenceObject ($NewScriptContents.split("`n")) | Out-String | Write-Verbose
             
-            Write-Host "Upadting this script with new file contents..."
+            Write-Host "Updating this script with new file contents..."
             [System.IO.File]::WriteAllText($MyInvocation.MyCommand.Path, $NewScriptContents)
             
             Write-Host "Script has been updated, please re-run to use new code." -ForegroundColor 'Yellow'
             exit
         } else {
-            Write-Host "Current script matches latest script, skipping update and continuing as normal..." -ForegroundColor 'Green'
+            Write-Host "There is a new version of the build script available, run '.\build.ps1 -Update' to update automatically." -ForegroundColor 'Yellow'
         }
+
+    } else {
+        Write-Host "Current script matches latest script, skipping update and continuing as normal..." -ForegroundColor 'Green'
     }
 } else {
     Write-Verbose "Self-updater skipped"
@@ -151,6 +155,12 @@ if ($decision -eq 0) {
         # insert _mods_ as we pretty much always use them anyway
         # e.g. 30_tour_power_surge.Enoch.pbo -> 30_tour_power_surge_mods_0_2.Enoch.pbo
         $PBO_withVersion = $ExportedPBO.Name.SubString(0, $ExportedPBO.Name.IndexOf('.')) + '_mods' + "_v$($NewVersion.ToString().Replace('.','_'))" + $ExportedPBO.Name.SubString($ExportedPBO.Name.IndexOf('.'))
+
+        $ExistingNamePBO = Get-Item -Path "$OutputPath\$PBO_withVersion" -ErrorAction 'SilentlyContinue'
+        if ($ExistingNamePBO) {
+            Write-Host "Renaming existing PBO with version from '$PBO_withVersion' to '$PBO_withVersion.backup'"
+            Rename-Item -Path $ExistingNamePBO.FullName -NewName "$PBO_withVersion.backup" -Force | Out-Null
+        }
 
         # rename PBO to include version
         Write-Host "Renaming PBO from '$MissionFolderName.pbo' to '$PBO_withVersion'"
