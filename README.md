@@ -6,6 +6,10 @@ Simple repository for the latest version of the Tour dev helper script that can 
   - [Prerequisites](#prerequisites)
   - [How to configure the script for your mission](#how-to-configure-the-script-for-your-mission)
   - [How to run the script](#how-to-run-the-script)
+  - [OPTIONAL - Set environment variables to save entering server details every time](#optional---set-environment-variables-to-save-entering-server-details-every-time)
+    - [Manually setting via PowerShell](#manually-setting-via-powershell)
+    - [Manually setting via GUI](#manually-setting-via-gui)
+    - [Using a PowerShell profile script](#using-a-powershell-profile-script)
   - [build.config.ps1 variable reference](#buildconfigps1-variable-reference)
 
 ## Prerequisites
@@ -63,6 +67,86 @@ class Missions
 5. (OPTIONAL) Use the script self-updater to save copy / pasting from GitHub
    1. Enter and run: `.\build.ps1 -Update`
 
+## OPTIONAL - Set environment variables to save entering server details every time
+
+It can get a little tedious to enter the Tour IP, FTP port, FTP user/pass each time you run the script, so there is the option to use environment variables to save entering them every run. There are various ways to set these variables, but I will cover three below. It is important to note that this so you don't have to type it out every time _but is 100% not required at all for the script to work_.
+
+Choose __ONE__ of the following options:
+
+1. Manually setting via PowerShell
+2. Manually setting via Windows GUI
+3. Using a PowerShell profile script that runs each time you open that PowerShell window
+
+### Manually setting via PowerShell
+
+This is the easiest option, however I have seen that it can take a _LONG_ time to apply (_1-2 minutes_) so be patient and as long as it doesn't throw an error then you'll be good to go.
+
+Just open the terminal you will use to run the build script normally as your normal user (not as Admin) and enter:
+
+```powershell
+[Environment]::SetEnvironmentVariable("TOUR_SERVER_IP", '1.2.3.4', "User")
+[Environment]::SetEnvironmentVariable("TOUR_SERVER_PORT", '8821', "User")
+[Environment]::SetEnvironmentVariable("TOUR_FTP_USERNAME", 'MyCPDusername', "User")
+[Environment]::SetEnvironmentVariable("TOUR_FTP_PASSWORD", 'Password123!', "User")
+```
+
+Restart your VS Code / PowerShell and then you should be good to go.
+
+### Manually setting via GUI
+
+This is the same as above but using the GUI, assumes Windows 10/11.
+
+1. Click Start or press Windows Key
+2. Search for & open the Settings App
+3. Search for "Environment"
+4. Select the option "Edit environment variables for your account"
+5. In the pop-up window, click "New"
+6. Enter the variable name `TOUR_SERVER_IP`
+   1. Input the correct value
+7. Repeat step 6 for
+   1. `TOUR_SERVER_PORT`
+   2. `TOUR_FTP_USERNAME`
+   3. `TOUR_FTP_PASSWORD`
+8. OK all Windows
+9. Done
+
+Now restart any VS Code or PowerShell windows to get the new variables.
+
+### Using a PowerShell profile script
+
+Open PowerShell from where you would normally run the build script, this would probably be using VS Code's integrated terminal if you use that (drag up from the bottom from between the blue/grey border and select the terminal tab) or just the normal PowerShell window if you don't.
+
+The first step is to create the parent directory if it doesn't already exist:
+
+```powershell
+# Check the path where this PS would load a profile from, including file name
+# You will notice this will be different when run from VS Code terminal and the native (blue) one
+Write-Host $profile
+
+# Create the parent directory, including any missing intermediates
+mkdir $profile.substring(0,($profile).LastIndexOf('\'))
+```
+
+Then you will need to either manually create the file listed in that `$profile` variable OR run the below to create it, replacing below with actual values.
+
+```powershell
+# Create a new profile file, with specified contents
+New-Item $profile -Value @"
+# e.g. '12.23.34.45'
+$ENV:TOUR_SERVER_IP ='ENTER_TOUR_IP'
+$ENV:TOUR_SERVER_PORT = 8821
+# if you have single quotes (') in your password, you can swap it below for doubles (")
+$env:TOUR_FTP_PASSWORD = 'MY_PASSWORD_FOR_CPDELUXE'
+$env:TOUR_FTP_USERNAME = 'MY_USERNAME_FOR_CPDELUXE'
+"@
+# Open up the file with your default text editor to check
+Invoke-Item $Profile
+```
+
+If it all looks OK, then you can restart VS Code / PS and try to run the build script. If all is well it will not prompt you any more (until you change your CP Deluxe password!).
+
+NOTE: If you get an error saying something like "Scripts are not allowed on this system" then you will need to open PowerShell as administrator and run: `Set-ExecutionPolicy Unrestricted -Force -Confirm:$false` and then close & re-open.
+
 ## build.config.ps1 variable reference
 
 This section is just a reference for the script variables that can be set, split into standard variables:
@@ -71,6 +155,7 @@ This section is just a reference for the script variables that can be set, split
 - `$Arma3InstallFolder` is just the directory where Arma 3 is installed to. (No trailing `\`).
 - `$Arma3ToolsFolder` is where your Arma 3 Tools is installed. (No trailing `\`).
 - `$OutputPath` is where the script will save the PBO. Defaults to your MPMissions folder to ease local testing.
+- `$FileBank_EXE` is the path to FileBank, which part of the Arma 3 Tools Steam download.
 
 ...and dedicated server variables:
 
