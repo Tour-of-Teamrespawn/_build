@@ -76,8 +76,8 @@ if (($null -eq $PSScriptRoot) -or ([System.String]::IsNullOrWhiteSpace($PSScript
 }
 $MissionFolderName = Split-Path $ProjectRoot -Leaf
 
-$decision = $Host.UI.PromptForChoice('Increment version and make PBO?', 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
-if ($decision -eq 0) {
+$inc_decision = $Host.UI.PromptForChoice('Increment version and make PBO?', 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
+if ($inc_decision -eq 0) {
     # Automatic increment of mission version found in init.sqf, used to add to the exported PBO
     $InitSQF = Get-Content -Path (Join-Path -Path $ProjectRoot -ChildPath 'init.sqf') -Raw
     # '###MISSION_VERSION\s+(\d+\.\d+)(-(\w+))?'
@@ -85,8 +85,8 @@ if ($decision -eq 0) {
     if ($InitSQF -match '###MISSION_VERSION\s+(\d+\.\d+)(-(\w+))?') {
 
 
-        $decision = $Host.UI.PromptForChoice('Set versioning method', 'Automatic version increment, or set manually?', @('&Automatic', '&Manual'), 0)
-        if ($decision -eq 0) {
+        $ver_decision = $Host.UI.PromptForChoice('Set versioning method', 'Automatic version increment, or set manually?', @('&Automatic', '&Manual'), 0)
+        if ($ver_decision -eq 0) {
             # automatic
             $Version = [System.Version]($Matches.1)
             Write-Host "Current mission version: $Version"
@@ -108,8 +108,8 @@ if ($decision -eq 0) {
             }
         }
 
-        $decision = $Host.UI.PromptForChoice('Add non-release tag', 'Would you like to add a tag? This is to show test versions such as "alpha", "beta", "RC1" etc', @('&No tag (This is a playable release)', '&Add non-release tag'), 0)
-        if ($decision -eq 0) {
+        $tag_decision = $Host.UI.PromptForChoice('Add non-release tag', 'Would you like to add a tag? This is to show test versions such as "alpha", "beta", "RC1" etc', @('&No tag (This is a playable release)', '&Add non-release tag'), 0)
+        if ($tag_decision -eq 0) {
             # do nothing, no tag added so define as empty
             $TagName = ''
         } else {
@@ -204,8 +204,8 @@ if ($null -eq $NewPBO) {
 
 # PBO UPLOAD TO ARMA 3 TOUR SERVER
 if ($null -ne $PBO_withVersion) {
-    $decision = $Host.UI.PromptForChoice("Upload PBO '$PBO_withVersion' to the Tour ARMA 3 server ?", 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
-    if ($decision -eq 0) {
+    $pbo_decision = $Host.UI.PromptForChoice("Upload PBO '$PBO_withVersion' to the Tour ARMA 3 server ?", 'Are you sure you want to proceed?', @('&Yes', '&No'), 1)
+    if ($pbo_decision -eq 0) {
         # yes
         if ($null -eq $env:TOUR_SERVER_IP) {
             # Environment var for IP not set, prompt for response
@@ -271,24 +271,35 @@ if ($null -ne $PBO_withVersion) {
         if ($PSCmdlet.ShouldProcess($FTPPath, 'Upload PBO to')) {
             Write-Host "Starting FTP upload to '$FTPPath'"
 
-            $ftp = [System.Net.FtpWebRequest]::Create($FTPPath)
-            $ftp = [System.Net.FtpWebRequest]$ftp
-            $ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
-            $ftp.Credentials = New-Object System.Net.NetworkCredential($FTPUsername, $FTPPassword)
-            $ftp.UseBinary = $true
-            $ftp.UsePassive = $true
-            $ftp.EnableSsl = $true
-            # read in the file to upload as a byte array
-            $content = [System.IO.File]::ReadAllBytes($NewPBO.FullName)
-            $ftp.ContentLength = $content.Length
-            # get the request stream, and write the bytes into it
-            $rs = $ftp.GetRequestStream()
-            $rs.Write($content, 0, $content.Length)
-            # be sure to clean up after ourselves
-            $rs.Close()
-            $rs.Dispose()
+            try {
+                $ftp = [System.Net.FtpWebRequest]::Create($FTPPath)
+                $ftp = [System.Net.FtpWebRequest]$ftp
+                $ftp.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
+                $ftp.Credentials = New-Object System.Net.NetworkCredential($FTPUsername, $FTPPassword)
+                $ftp.UseBinary = $true
+                $ftp.UsePassive = $true
+                $ftp.EnableSsl = $true
+                # read in the file to upload as a byte array
+                $content = [System.IO.File]::ReadAllBytes($NewPBO.FullName)
+                $ftp.ContentLength = $content.Length
+                # get the request stream, and write the bytes into it
+                $rs = $ftp.GetRequestStream()
+                $rs.Write($content, 0, $content.Length)
+                # be sure to clean up after ourselves
+                $rs.Close()
+                $rs.Dispose()
 
-            Write-Host 'FTP upload successful'
+                Write-Host 'FTP upload successful'
+            }
+            catch {
+                Write-Host "Failed to upload PBO to '$FTPPath'." -ForegroundColor 'Red' -BackgroundColor Black
+                Write-Host "Possible issues:" -ForegroundColor 'Red' -BackgroundColor Black
+                Write-Host "`tFTP password is invalid (changed recently?)" -ForegroundColor 'Red' -BackgroundColor Black
+                Write-Host "`tPBO with exact name already exists" -ForegroundColor 'Red' -BackgroundColor Black
+                Write-Host "`tNetwork connectivity" -ForegroundColor 'Red' -BackgroundColor Black
+                throw $_
+            }
+            
         }
         
     } else {
