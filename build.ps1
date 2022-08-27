@@ -98,6 +98,7 @@ if ($inc_decision -eq 0) {
             # manual
             $NewVersion = 'NOT A REAL VERSION'
             while ($NewVersion -notmatch '^\d+\.\d+$') {
+                Write-Host ""
                 try {
                     $NewVersion = Read-Host "Enter the desired version in the format XX.XX, where X can be any number of digits [0-9] with a dot separating them.`nFor example: 123.123 or 1.0`nDo not include any letters or symbols" -ErrorAction 'Stop'
                     $NewVersion = [System.Version]$NewVersion
@@ -108,6 +109,8 @@ if ($inc_decision -eq 0) {
             }
         }
 
+        Write-Host ""
+
         $tag_decision = $Host.UI.PromptForChoice('Add non-release tag', 'Would you like to add a tag? This is to show test versions such as "alpha", "beta", "RC1" etc', @('&No tag (This is a playable release)', '&Add non-release tag'), 0)
         if ($tag_decision -eq 0) {
             # do nothing, no tag added so define as empty
@@ -116,6 +119,7 @@ if ($inc_decision -eq 0) {
             # request
             $TagName = 'NOT A REAL TAG'
             while ($TagName -notmatch '^[a-zA-Z0-9]+$') {
+                Write-Host ""
                 try {
                     $TagName = Read-Host "Enter the desired tag name, it must only be lowercase [a-z], UPPERCASE [A-Z] or digits [0-9].`nFor example: beta or RC1`nDo not include any special characaters or spaces." -ErrorAction 'Stop'
                 } catch {
@@ -167,6 +171,8 @@ if ($inc_decision -eq 0) {
         Write-Warning "Version missing from init.sqf. For automatic version increments add a comment somewhere in your init.sqf with a line exactly like so:`n###MISSION_VERSION 0.1`n   OR`n###MISSION_VERSION 1.1-beta'"
     }
 
+    Write-Host ""
+
     if ($PSCmdlet.ShouldProcess('Mission folder', 'Pack PBO and export')) {
         Write-Host "Packing mission folder: '$MissionFolderName' to path: '$OutputPath' as '$MissionFolderName.pbo'"
         & $FileBank_EXE -dst $OutputPath $ProjectRoot
@@ -201,6 +207,8 @@ if ($null -eq $NewPBO) {
         $PBO_withVersion = $NewPBO.Name
     } 
 }
+
+Write-Host ""
 
 # PBO UPLOAD TO ARMA 3 TOUR SERVER
 if ($null -ne $PBO_withVersion) {
@@ -309,6 +317,7 @@ if ($null -ne $PBO_withVersion) {
 } else {
     Write-Warning "No PBO was generated nor one found in '$OutputPath' matching '$($MissionFolderName.split('.')[0])'. Skipping upload to Tour server..."
 }
+Write-Host ""
 
 # START LOCAL DEDICATED SERVER WITH LATEST MISSIONS
 $decision = $Host.UI.PromptForChoice('Start local dedicated server', 'Do you want to start up a local dedicated server?', @('&Yes', '&No'), 1)
