@@ -79,7 +79,7 @@ Choose __ONE__ of the following options:
 
 ### Manually setting via PowerShell
 
-This is the easiest option, however I have seen that it can take a _LONG_ time to apply (_1-2 minutes_) so be patient and as long as it doesn't throw an error then you'll be good to go.
+This is the easiest option, however I have seen that it can take a _LONG_ time to apply (_1-4 minutes_) so be patient and as long as it doesn't throw an error then you'll be good to go.
 
 Just open the terminal you will use to run the build script normally as your normal user (not as Admin) and enter:
 
