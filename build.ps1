@@ -66,6 +66,7 @@ if ($PSCmdlet.ShouldProcess('This script', 'Update script with latest version fr
     Write-Verbose "Self-updater skipped"
 }
 
+$matches = $null
 $ErrorActionPreference = 'Stop'
 if (($null -eq $PSScriptRoot) -or ([System.String]::IsNullOrWhiteSpace($PSScriptRoot))) {
     # assume we are in the root of the mission folder (same as this file)
@@ -79,9 +80,11 @@ $decision = $Host.UI.PromptForChoice('Increment version and make PBO?', 'Are you
 if ($decision -eq 0) {
     # Automatic increment of mission version found in init.sqf, used to add to the exported PBO
     $InitSQF = Get-Content -Path (Join-Path -Path $ProjectRoot -ChildPath 'init.sqf') -Raw
-    if ($InitSQF -match '###MISSION_VERSION\s+(\d+\.\d+)') {
+    # '###MISSION_VERSION\s+(\d+\.\d+)(-(\w+))?'
+    # '###MISSION_VERSION\s+(\d+\.\d+)'
+    if ($InitSQF -match '###MISSION_VERSION\s+(\d+\.\d+)(-(\w+))?') {
 
-        
+
         $decision = $Host.UI.PromptForChoice('Set versioning method', 'Automatic version increment, or set manually?', @('&Automatic', '&Manual'), 0)
         if ($decision -eq 0) {
             # automatic
@@ -104,9 +107,29 @@ if ($decision -eq 0) {
                 }
             }
         }
+
+        $decision = $Host.UI.PromptForChoice('Add non-release tag', 'Would you like to add a tag? This is to show test versions such as "alpha", "beta", "RC1" etc', @('&No tag (This is a playable release)', '&Add non-release tag'), 0)
+        if ($decision -eq 0) {
+            # do nothing, no tag added so define as empty
+            $TagName = ''
+        } else {
+            # request
+            $TagName = 'NOT A REAL TAG'
+            while ($TagName -notmatch '^[a-zA-Z0-9]+$') {
+                try {
+                    $TagName = Read-Host "Enter the desired tag name, it must only be lowercase [a-z], UPPERCASE [A-Z] or digits [0-9].`nFor example: beta or RC1`nDo not include any special characaters or spaces." -ErrorAction 'Stop'
+                } catch {
+                    # if we fail to read input, reset
+                    $TagName = 'NOT A REAL TAG'
+                }
+            }
+            if (![string]::IsNullOrWhiteSpace($TagName)) {
+                $TagName = "-$TagName"
+            }
+        }
         
         if ($PSCmdlet.ShouldProcess('All matching files', 'Update all references to version')) {
-            $NewInitSQF = ($InitSQF -replace '###MISSION_VERSION\s(\d+\.\d+)', "###MISSION_VERSION $NewVersion").split("`n")
+            $NewInitSQF = ($InitSQF -replace '###MISSION_VERSION\s+(\d+\.\d+)(-(\w+))?', ("###MISSION_VERSION " + $NewVersion + $TagName)).split("`n")
             # WriteAllText with joined string array instead of WriteAllLines to stop adding a CRLF to the end of file
             try {
                 [System.IO.File]::WriteAllText((Join-Path -Path $ProjectRoot -ChildPath 'init.sqf'), ($NewInitSQF -join "`n")) 
@@ -126,7 +149,7 @@ if ($decision -eq 0) {
 
                 if ($FileContents -match ([regex]::Escape($MissionName_withV) + '\d+\.\d+')) {
 
-                    $NewFileContents = ($FileContents -replace ([regex]::Escape($MissionName_withV) + '\d+\.\d+'), ($MissionName_withV + $NewVersion)).split("`n")
+                    $NewFileContents = ($FileContents -replace ([regex]::Escape($MissionName_withV) + '\d+\.\d+(-\w+)?'), ($MissionName_withV + $NewVersion + $TagName)).split("`n")
                     try {
                         [System.IO.File]::WriteAllText($File.FullName, ($NewFileContents -join "`n")) 
                     } catch {
@@ -141,7 +164,7 @@ if ($decision -eq 0) {
         }
 
     } else {
-        Write-Warning "Version missing from init.sqf. For automatic version increments add a block comment somewhere in your init.sqf with a line exactly like so: '###MISSION_VERSION 0.1'"
+        Write-Warning "Version missing from init.sqf. For automatic version increments add a comment somewhere in your init.sqf with a line exactly like so:`n###MISSION_VERSION 0.1`n   OR`n###MISSION_VERSION 1.1-beta'"
     }
 
     if ($PSCmdlet.ShouldProcess('Mission folder', 'Pack PBO and export')) {
@@ -154,7 +177,7 @@ if ($decision -eq 0) {
         # insert (file name compatible) version to pbo before world
         # insert _mods_ as we pretty much always use them anyway
         # e.g. 30_tour_power_surge.Enoch.pbo -> 30_tour_power_surge_mods_0_2.Enoch.pbo
-        $PBO_withVersion = $ExportedPBO.Name.SubString(0, $ExportedPBO.Name.IndexOf('.')) + '_mods' + "_v$($NewVersion.ToString().Replace('.','_'))" + $ExportedPBO.Name.SubString($ExportedPBO.Name.IndexOf('.'))
+        $PBO_withVersion = $ExportedPBO.Name.SubString(0, $ExportedPBO.Name.IndexOf('.')) + '_mods' + "_v$($NewVersion.ToString().Replace('.','_'))" + $TagName.replace('-','_') + $ExportedPBO.Name.SubString($ExportedPBO.Name.IndexOf('.'))
 
         $ExistingNamePBO = Get-Item -Path "$OutputPath\$PBO_withVersion" -ErrorAction 'SilentlyContinue'
         if ($ExistingNamePBO) {
