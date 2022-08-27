@@ -107,7 +107,7 @@ This is the same as above but using the GUI, assumes Windows 10/11.
    1. `TOUR_SERVER_PORT`
    2. `TOUR_FTP_USERNAME`
    3. `TOUR_FTP_PASSWORD`
-8. OK all Windows
+8. OK all open windows
 9. Done
 
 Now restart any VS Code or PowerShell windows to get the new variables.
