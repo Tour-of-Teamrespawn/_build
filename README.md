@@ -64,7 +64,7 @@ class Missions
       3. Specify Tour FTP username (if environment variable `TOUR_FTP_USERNAME` is not defined).
       4. Specify Tour FTP password (if environment variable `TOUR_FTP_PASSWORD` is not defined).
    4. Start local dedicated server with newly packed / incremented PBO.
-5. (OPTIONAL) Use the script self-updater to save copy / pasting from GitHub
+5. (OPTIONAL) Use the script self-updater to save a few clicks copy & pasting from GitHub.
    1. Enter and run: `.\build.ps1 -Update`
 
 ## OPTIONAL - Set environment variables to save entering server details every time
