@@ -118,10 +118,10 @@ if ($inc_decision -eq 0) {
         } else {
             # request
             $TagName = 'NOT A REAL TAG'
-            while ($TagName -notmatch '^[a-zA-Z0-9]+$') {
+            while ($TagName -notmatch '^[a-zA-Z]+$') {
                 Write-Host ""
                 try {
-                    $TagName = Read-Host "Enter the desired tag name, it must only be lowercase [a-z], UPPERCASE [A-Z] or digits [0-9].`nFor example: beta or RC1`nDo not include any special characaters or spaces." -ErrorAction 'Stop'
+                    $TagName = Read-Host "Enter the desired tag name, it must only be lowercase [a-z] or UPPERCASE [A-Z].`nFor example: beta or RC1`nDo not include any numbers, special characaters or spaces." -ErrorAction 'Stop'
                 } catch {
                     # if we fail to read input, reset
                     $TagName = 'NOT A REAL TAG'
