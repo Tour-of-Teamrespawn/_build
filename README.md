@@ -17,10 +17,9 @@ Simple repository for the latest version of the Tour dev helper script that can 
 Prerequisites for this helper script are as follows:
 
 - ARMA 3 installed.
-- ARMA 3 dedicated server installed.
-  - Optional - To aid faster local development
 - ARMA 3 Tools installed.
 - Tour server access to upload files via FTP. (Ask an admin for CPDeluxe access if you do not have this already).
+- ARMA 3 dedicated server installed. (Optional - To aid faster local development)
 
 ## How to configure the script for your mission
 
