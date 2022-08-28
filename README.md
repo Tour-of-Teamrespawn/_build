@@ -20,9 +20,6 @@ Prerequisites for this helper script are as follows:
 - ARMA 3 dedicated server installed.
   - Optional - To aid faster local development
 - ARMA 3 Tools installed.
-- PowerShell configured to allow scripts to run.
-  - Already complete if you have followed the [README](https://github.com/Tour-of-Teamrespawn/.github/blob/main/profile/README.md#configure-powershell-git-and-build-script) in the org root.
-  - Pretty much consists of running PowerShell as administrator and running `Set-ExecutionPolicy Unrestricted -Force -Confirm:$false` or adding `Set-ExecutionPolicy Unrestricted -Scope User` & some environment variables to your PowerShell profile.
 - Tour server access to upload files via FTP. (Ask an admin for CPDeluxe access if you do not have this already).
 
 ## How to configure the script for your mission
@@ -58,13 +55,16 @@ class Missions
 4. Follow the on-screen script prompts, explanations for which are:
    1. Increment version and pack PBO.
       1. With automatic or manual versioning. Manually specifying version would be used to say "build / release _this_ as version 1.0" for example.
-   2. Upload newly incremented & packed PBO to Tour server (requires step 1 to be chosen in this run).
+   2. Set non-playable version tag
+      1. Default is no tag, meaning that this version has been tested and is good for public server play.
+      2. Other option is to manually specify a tag, such as `beta` or `RC1` so that server admins can filter out test versions.
+   3. Upload newly incremented & packed PBO to Tour server (requires step 1 to be chosen in this run).
       1. Specify Tour server IP (if environment variable `TOUR_SERVER_IP` is not defined).
       2. Specify Tour FTP port (if environment variable `TOUR_SERVER_PORT` is not defined).
       3. Specify Tour FTP username (if environment variable `TOUR_FTP_USERNAME` is not defined).
       4. Specify Tour FTP password (if environment variable `TOUR_FTP_PASSWORD` is not defined).
-   3. Start local dedicated server with newly packed / incremented PBO.
-5. (OPTIONAL) Use the script self-updater to save copy / pasting from GitHub
+   4. Start local dedicated server with newly packed / incremented PBO.
+5. (OPTIONAL) Use the script self-updater to save a few clicks copy & pasting from GitHub.
    1. Enter and run: `.\build.ps1 -Update`
 
 ## OPTIONAL - Set environment variables to save entering server details every time
@@ -79,7 +79,7 @@ Choose __ONE__ of the following options:
 
 ### Manually setting via PowerShell
 
-This is the easiest option, however I have seen that it can take a _LONG_ time to apply (_1-2 minutes_) so be patient and as long as it doesn't throw an error then you'll be good to go.
+This is the easiest option, however I have seen that it can take a _LONG_ time to apply (_1-4 minutes_) so be patient and as long as it doesn't throw an error then you'll be good to go.
 
 Just open the terminal you will use to run the build script normally as your normal user (not as Admin) and enter:
 
@@ -107,7 +107,7 @@ This is the same as above but using the GUI, assumes Windows 10/11.
    1. `TOUR_SERVER_PORT`
    2. `TOUR_FTP_USERNAME`
    3. `TOUR_FTP_PASSWORD`
-8. OK all Windows
+8. OK all open windows
 9. Done
 
 Now restart any VS Code or PowerShell windows to get the new variables.
@@ -145,7 +145,7 @@ Invoke-Item $Profile
 
 If it all looks OK, then you can restart VS Code / PS and try to run the build script. If all is well it will not prompt you any more (until you change your CP Deluxe password!).
 
-NOTE: If you get an error saying something like "Scripts are not allowed on this system" then you will need to open PowerShell as administrator and run: `Set-ExecutionPolicy Unrestricted -Force -Confirm:$false` and then close & re-open.
+NOTE: If you get an error saying something like "Scripts are not allowed on this system" then you will need to open PowerShell "As Administrator" and run: `Set-ExecutionPolicy Unrestricted -Force -Confirm:$false` and then close & re-open.
 
 ## build.config.ps1 variable reference
 
