@@ -5,7 +5,7 @@
     TOUR build helper script to automatically bump version, pack as PBO, upload to Tour via FTP & start local dedicated server
 .NOTES
     Author: Andy455
-    Version: v0.7
+    Version: v0.8
 .LINK
     https://github.com/Tour-of-Teamrespawn/_build
 .EXAMPLE
